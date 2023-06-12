@@ -65,9 +65,9 @@ public class Fuzzy_logic : MonoBehaviour
 
     private void FixedUpdate()
     {
-        
-        Update_param();
         Update_Move();
+        Update_param();
+        
     }
 
     private void Update_Move()

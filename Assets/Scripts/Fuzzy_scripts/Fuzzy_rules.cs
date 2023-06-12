@@ -6,10 +6,15 @@ public class Fuzzy_rules : MonoBehaviour
 {
     public Fuzzy_logic l = new Fuzzy_logic();
 
+    public void FixedUpdate()
+    {
+        Rules();
+    }
+
     private void Rules()
     {
         // арёёђюџэшџ
         //if ((l.Distance_left == "СЫШЧЪЮ") && ()) { l.Speed = "СлбваЮ" }
-
+        l.Speed = "СлбваЮ";
     }
 }
