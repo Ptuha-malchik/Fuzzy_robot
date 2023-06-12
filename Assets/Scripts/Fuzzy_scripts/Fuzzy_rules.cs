@@ -13,8 +13,7 @@ public class Fuzzy_rules : MonoBehaviour
 
     private void Rules()
     {
-        // арёёђюџэшџ
-        //if ((l.Distance_left == "СЫШЧЪЮ") && ()) { l.Speed = "СлбваЮ" }
-        l.Speed = "СлбваЮ";
+
+
     }
 }
