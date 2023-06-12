@@ -18,14 +18,19 @@ public class Fuzzy_logic : MonoBehaviour
 
     // Функция принадлежности
 
-    public float[,] Speed_func =            {{-0.2f, -0.1f, 0.1f, 0.2f},        // Стоп
-                                             {0, 2, 3, 4},                 // Медлено
-                                             {3.5f, 5, 8, 10},             // Средне
-                                             {8.5f, 12, 15, 20}};          // Быстро
+    public float[,] Speed_func =            {{-0.2f, -0.1f, 0.1f, 0.2f},    // Стоп
+                                             {0, 2, 3, 4},                  // Медлено
+                                             {3.5f, 5, 8, 10},              // Средне
+                                             {8.5f, 12, 15, 20}};           // Быстро
 
-    public float[,] Dist_func =             {{0, 1.5f, 4f, 5},             // Близко
-                                             {4.5f, 6f, 9f, 10},           // Средне
-                                             {9.5f, 11, 50, 200}};         // Далеко
+    public float[,] Dist_func =             {{0, 1.5f, 4f, 5},              // Близко
+                                             {4.5f, 6f, 9f, 10},            // Средне
+                                             {9.5f, 11, 50, 200}};          // Далеко
+
+    public float[,] Dist_to_target_func =   {{0, 1.5f, 4f, 5},              // ВПЛОТНУЮ
+                                             {4.5f, 5f, 8f, 10},            // Близко
+                                             {9.5f, 11f, 20f, 30},          // Средне
+                                             {25f, 30, 50, 100}};           // Далеко
 
     public float[,] Deg_to_target_func =    {{-20, -18.5f, 18.5f, 20},      // Норма
                                              {-18.5f, -25, -90, -100},      // Левее
@@ -34,10 +39,10 @@ public class Fuzzy_logic : MonoBehaviour
                                              {95, 110, 170, 180}};          // Сильно правее
 
     public float[,] Degree_func =           {{0, 0, 0, 0},                  // Норма
-                                             {-10, -10, -10, -10},          // Левее
-                                             {-25, -25, -25, -25},          // Сильно левее
-                                             {10, 10, 10, 10},              // Правее
-                                             {25, 25, 25, 25}};             // Сильно правее
+                                             {-1, -1, -1, -1},              // Левее
+                                             {-2, -2, -2, -2},              // Сильно левее
+                                             {1, 1, 1, 1},                  // Правее
+                                             {2, 2, 2, 2}};                 // Сильно правее
     // Переменные
     private static string Speed_stop_name = "СТОП";
     private static string Speed_low_name = "МЕДЛЕННО";
@@ -54,14 +59,23 @@ public class Fuzzy_logic : MonoBehaviour
     private static string To_target_right = "ПРАВЕЕ";
     private static string To_target_more_right = "СИЛЬНО ПРАВО";
 
+    private static string Distance_to_target_stop_name = "ВПЛОТНУЮ";
+    private static string Distance_to_target_low_name = "БЛИЗКО";
+    private static string Distance_to_target_med_name = "СРЕДНЕ";
+    private static string Distance_to_target_high_name = "ДАЛЕКО";
     // Текущее стостяние
 
+    // Управление
     public string Speed = "СТОП";
+    public string Degree = "РОВНО";// Заданный угол (управление)
+
+
+    // Полученные данные
     public string Distance_left = "БЛИЗКО";
     public string Distance_right = "БЛИЗКО";
     public string Distance_front = "БЛИЗКО";
     public string To_target = "РОВНО";
-    public string Degree = "РОВНО";// Заданный угол (управление)
+    public string Dist_to_target = "ДАЛЕКО";
 
     private void FixedUpdate()
     {
@@ -154,17 +168,32 @@ public class Fuzzy_logic : MonoBehaviour
         if (y_dist_hig == mass_dist_f[2]) Distance_front = Distance_high_name;
 
 
-        // Рассчет Направления на цель для определения переменной
-        //float angle = transform.eulerAngles.y;
+        // Расстояние до цели
+        float _dist_to_traget = Vector3.Distance(target.position, Lidar.transform.position);
+        float y_dist_s = Rules_y(Get_rows(Dist_to_target_func, 0), _dist_to_traget);
+        y_dist_low = Rules_y(Get_rows(Dist_to_target_func, 1), _dist_to_traget);
+        y_dist_med = Rules_y(Get_rows(Dist_to_target_func, 2), _dist_to_traget);
+        y_dist_hig = Rules_y(Get_rows(Dist_to_target_func, 3), _dist_to_traget);
 
-        float angle = AngleAroundAxis(target.transform.forward, target.transform.position - transform.position, transform.up)-90f;
+
+        float[] mass_dist_to_target = { y_dist_s, y_dist_low, y_dist_med, y_dist_hig };
+        Array.Sort(mass_dist_to_target);
+        if (y_dist_s == mass_dist_to_target[3]) Dist_to_target = Distance_to_target_stop_name;
+        if (y_dist_low == mass_dist_to_target[3]) Dist_to_target = Distance_to_target_low_name;
+        if (y_dist_med == mass_dist_to_target[3]) Dist_to_target = Distance_to_target_med_name;
+        if (y_dist_hig == mass_dist_to_target[3]) Dist_to_target = Distance_to_target_high_name;
+
+    // Рассчет Направления на цель для определения переменной
+    //float angle = transform.eulerAngles.y;
+
+    float angle = AngleAroundAxis(target.transform.forward, target.transform.position - transform.position, transform.up)-90f;
         if (angle < -180)
         {
             angle += 360;
         }
 
 
-        UnityEngine.Debug.Log(angle);
+        //UnityEngine.Debug.Log(angle);
 
         float y_angle_norm = Rules_y(Get_rows(Deg_to_target_func, 0), angle);
         float y_angle_left = Rules_y(Get_rows(Deg_to_target_func, 1), angle);
